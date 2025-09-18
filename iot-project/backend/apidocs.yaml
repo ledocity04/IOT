@@ -1,0 +1,196 @@
+openapi: 3.0.0
+info:
+  title: IoT Project API
+  description: API for interacting with IoT devices, collecting sensor data, and logging actions.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+    description: Local server
+
+paths:
+  /status:
+    get:
+      summary: Retrieve the latest status of IoT devices.
+      responses:
+        200:
+          description: Successfully retrieved device status.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    fan:
+                      type: string
+                      description: Fan status
+                    light:
+                      type: string
+                      description: Light status
+                    ac:
+                      type: string
+                      description: AC status
+                    temperature:
+                      type: number
+                      format: float
+                      description: Temperature in Celsius
+                    humidity:
+                      type: number
+                      format: float
+                      description: Humidity percentage
+                    lux:
+                      type: number
+                      format: float
+                      description: Light intensity in lux
+
+  /data_sensor:
+    get:
+      summary: Retrieve sensor data from the database.
+      responses:
+        200:
+          description: Successfully retrieved sensor data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    temperature:
+                      type: number
+                      format: float
+                      description: Temperature in Celsius
+                    humidity:
+                      type: number
+                      format: float
+                      description: Humidity percentage
+                    lux:
+                      type: number
+                      format: float
+                      description: Light intensity in lux
+                    date:
+                      type: string
+                      format: date-time
+                      description: Date and time of data record
+
+  /action_history:
+    get:
+      summary: Retrieve action history from the database.
+      responses:
+        200:
+          description: Successfully retrieved action history.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    device:
+                      type: string
+                      description: The device involved (fan, light, AC)
+                    action:
+                      type: string
+                      description: The action performed (on/off)
+                    date:
+                      type: string
+                      format: date-time
+                      description: The date and time of the action
+
+  /actiondata:
+    post:
+      summary: Send action data to the IoT device.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device:
+                  type: string
+                  description: The device to control (fan, light, AC)
+                action:
+                  type: string
+                  description: The action to perform (on/off)
+      responses:
+        200:
+          description: Successfully sent action to the IoT device.
+        500:
+          description: Failed to send action data to the MQTT broker
+
+  /sensor_search:
+    get:
+      summary: Search sensor data with filters.
+      parameters:
+        - name: parameterFilter
+          in: query
+          description: The sensor parameter to filter (temperature, humidity, lux)
+          schema:
+            type: string
+        - name: dateFilter
+          in: query
+          description: Filter data by date.
+          schema:
+            type: string
+            format: date
+        - name: searchTerm
+          in: query
+          description: Value to search for within the specified parameter.
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+        - name: currentPage
+          in: query
+          description: The page number of the results to return.
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successfully retrieved sensor search results.
+        500:
+          description: Failed to execute search query
+
+  /history_search:
+    get:
+      summary: Search action history with filters.
+      parameters:
+        - name: deviceFilter
+          in: query
+          description: Filter by device (fan, light, AC)
+          schema:
+            type: string
+        - name: dateFilter
+          in: query
+          description: Filter actions by date.
+          schema:
+            type: string
+            format: date
+        - name: searchTerm
+          in: query
+          description: Search for specific action.
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+        - name: currentPage
+          in: query
+          description: The page number of the results to return.
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successfully retrieved action history search results.
+        500:
+          description: Failed to execute search query

@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital@0;1&display=swap');
+
+.spinning-fan {
+  animation: spin 2s linear infinite;
+  font-size: 2rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.shining-light {
+  color: #FFD700;
+  font-size: 2rem;
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700, 0 0 50px #FFD700, 0 0 60px #FFD700, 0 0 70px #FFD700;
+  }
+  to {
+    text-shadow: 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700, 0 0 50px #FFD700, 0 0 60px #FFD700, 0 0 70px #FFD700, 0 0 80px #FFD700;
+  }
+}
+
+.blowing-air {
+  font-size: 2rem;
+  animation: blow 1.5s ease-in-out infinite;
+}
+
+@keyframes blow {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.temp{
+  font-size: 2rem;
+}
+
+.humi{
+  font-size: 2rem;
+}
+
+.lux{
+  font-size: 2rem;
+}
+
+.fan{
+  :hover{
+    background-color: #18b418;
+  }
+}

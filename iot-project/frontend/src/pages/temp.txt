@@ -1,0 +1,9 @@
+<div className="d-flex justify-content-center mt-3">
+        <Pagination
+          count={11}
+          defaultPage={1}
+          siblingCount={2}
+          // onChange={handlePageChange}
+          page={currentPage}
+        />
+      </div>
