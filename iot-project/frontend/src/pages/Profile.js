@@ -1,6 +1,6 @@
 import React from "react";
-import { Container, Row, Col, Card, Button, Image } from "react-bootstrap";
-import { FaFacebook, FaGithub, FaYoutube, FaBook } from "react-icons/fa";
+import { Container, Row, Col, Card, Image } from "react-bootstrap";
+import { FaRegFilePdf, FaGithub, FaExternalLinkAlt } from "react-icons/fa";
 
 const ProfilePage = () => {
   return (
@@ -41,6 +41,7 @@ const ProfilePage = () => {
                 <a
                   // href="https://drive.google.com/file/d/143sZTtUgLB676G40vt9Uc8OSg75fzRr8/view?usp=sharing"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   Drive
                 </a>
@@ -50,10 +51,10 @@ const ProfilePage = () => {
                 <Col md={6}>
                   <h5 className="mb-3">Contact Information</h5>
                   <p className="mb-4">
-                    <strong>Email:</strong> duodaiz1412@gmail.com
+                    <strong>Email:</strong> nemmphamit04@gmail.com
                   </p>
                   <p className="mb-4">
-                    <strong>Phone:</strong> +0964 000 337
+                    <strong>Phone:</strong> +0987582904
                   </p>
                   <p className="mb-4">
                     <strong>Location:</strong> Ha Noi, Viet Nam
@@ -61,48 +62,58 @@ const ProfilePage = () => {
                 </Col>
                 <Col md={6}>
                   <h5>Social Media & Resources:</h5>
-                  <div className="d-block mb-2">
-                    <Button
-                      variant="primary"
-                      className="w-100 mb-2"
-                      href="https://www.facebook.com/trum.kimanh"
-                      target="_blank"
-                    >
-                      <FaFacebook className="me-2" /> Facebook
-                    </Button>
-                  </div>
 
-                  <div className="d-block mb-2">
-                    <Button
-                      variant="dark"
-                      className="w-100 mb-2"
-                      href="https://github.com/Dazkiz1412"
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                    }}
+                  >
+                    <a
+                      href="/assets/document.pdf"
                       target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-danger"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
                     >
-                      <FaGithub className="me-2 " /> GitHub
-                    </Button>
-                  </div>
+                      <FaRegFilePdf />
+                      PDF Document
+                    </a>
 
-                  <div className="d-block mb-2">
-                    <Button
-                      variant="danger"
-                      className="w-100 mb-2"
-                      href="https://www.youtube.com/@NamPham-we3xt"
+                    <a
+                      href="https://github.com/ledocity04/IOT"
                       target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-dark"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
                     >
-                      <FaYoutube className="me-2" /> YouTube
-                    </Button>
-                  </div>
+                      <FaGithub />
+                      GitHub
+                    </a>
 
-                  <div className="d-block mb-2">
-                    <Button
-                      variant="success"
-                      className="w-100 mb-2"
-                      href="http://localhost:8081/api-docs"
+                    <a
+                      href="http://localhost:8081/api-docs/"
                       target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-success"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
                     >
-                      <FaBook className="me-2" /> API Docs
-                    </Button>
+                      <FaExternalLinkAlt />
+                      API Docs
+                    </a>
                   </div>
                 </Col>
               </Row>

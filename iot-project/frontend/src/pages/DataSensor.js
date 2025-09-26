@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { CHeader, CContainer } from "@coreui/react";
 import DataTable from "react-data-table-component";
 import { CiSearch } from "react-icons/ci";
+import { FaRegCopy } from "react-icons/fa";
 import axios from "axios";
 import Pagination from "@mui/material/Pagination";
 
@@ -17,48 +18,94 @@ function DataSensor() {
   const [parameterFilter, setParameterFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sort, setSort] = useState("desc");
-  const [activeColumn, setActiveColumn] = useState(null); // Track the active column
+  const [activeColumn, setActiveColumn] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRows, setTotalRows] = useState(0);
 
-  useEffect(() => {}, [activeColumn, sort, currentPage, pageSize]);
+  // Copy state
+  const [copiedId, setCopiedId] = useState(null);
+  const copyTimeoutRef = useRef(null);
 
+  // new: track mounted state to avoid setState after unmount
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // updated fetchData: check isMountedRef before setState
+  const fetchData = async (filters = {}) => {
+    try {
+      const response = await axios.get("http://localhost:8081/sensor_search", {
+        params: filters,
+      });
+      // only update state if component still mounted
+      if (!isMountedRef.current) return;
+      console.log(response.data);
+      setCurrentPage(1);
+      setRecord(response.data.data || []);
+      setTotalRows(response.data.totalRows || 0);
+    } catch (error) {
+      // ignore if unmounted, otherwise log
+      if (isMountedRef.current) {
+        console.error("Error fetching data:", error);
+      }
+    }
+  };
+
+  // updated handleSort: same mounted check
   const handleSort = (column) => {
     const newSortOrder =
       sort === "desc" ? "asc" : sort === "asc" ? "desc" : "desc";
     setSort(newSortOrder);
-    setActiveColumn(column); // Set the column as active
+    setActiveColumn(column);
 
     const fetch = async () => {
       try {
         const response = await axios.get("http://localhost:8081/sort_sensor", {
           params: {
             column,
-            sort: newSortOrder, // Send sort order (asc, desc, or all)
+            sort: newSortOrder,
           },
         });
-        setRecord(response.data); // Update data with sorted results
+        if (!isMountedRef.current) return;
+        setRecord(response.data || []);
       } catch (error) {
-        console.error("Error fetching sorted data:", error);
+        if (isMountedRef.current)
+          console.error("Error fetching sorted data:", error);
       }
     };
 
-    fetch(); // Fetch sorted data from backend
+    fetch();
   };
 
   const sortIcon = (column) => {
-    // Show the correct icon only for the active column
     if (activeColumn === column) {
       if (sort === "asc")
         return <SortUp style={{ fontSize: "1rem", cursor: "pointer" }} />;
       if (sort === "desc")
         return <SortDown style={{ fontSize: "1rem", cursor: "pointer" }} />;
     }
-    // Default icon for columns that aren't currently sorted
     return <UnSort style={{ fontSize: "1rem", cursor: "pointer" }} />;
+  };
+
+  // copy handler
+  const handleCopyTime = async (text, id) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => setCopiedId(null), 1500);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
   };
 
   const columns = [
@@ -66,10 +113,11 @@ function DataSensor() {
       name: (
         <>
           ID
-          <span onClick={() => handleSort("id")}>{sortIcon("id")}</span>{" "}
+          <span onClick={() => handleSort("id")}>{sortIcon("id")}</span>
         </>
       ),
       selector: (row) => row.id,
+      sortable: true,
     },
     {
       name: (
@@ -77,10 +125,11 @@ function DataSensor() {
           Nhiệt độ
           <span onClick={() => handleSort("temperature")}>
             {sortIcon("temperature")}
-          </span>{" "}
+          </span>
         </>
       ),
       selector: (row) => row.temperature,
+      sortable: true,
     },
     {
       name: (
@@ -88,30 +137,80 @@ function DataSensor() {
           Độ ẩm
           <span onClick={() => handleSort("humidity")}>
             {sortIcon("humidity")}
-          </span>{" "}
+          </span>
         </>
       ),
       selector: (row) => row.humidity,
+      sortable: true,
     },
     {
       name: (
         <>
           Ánh sáng
-          <span onClick={() => handleSort("lux")}>{sortIcon("lux")}</span>{" "}
+          <span onClick={() => handleSort("lux")}>{sortIcon("lux")}</span>
         </>
       ),
       selector: (row) => row.lux,
+      sortable: true,
     },
     {
       name: (
         <>
           Thời gian
-          <span onClick={() => handleSort("date")}>
-            {sortIcon("date")}
-          </span>{" "}
+          <span onClick={() => handleSort("date")}>{sortIcon("date")}</span>
         </>
       ),
-      selector: (row) => row.date,
+      minWidth: "240px",
+      // cập nhật: ignoreRowClick + allowOverflow + button để DataTable không trigger row click
+      // render custom cell with copy button — ép 1 dòng bằng CSS inline (nowrap)
+      cell: (row) => {
+        const timeText = row.date || row.timestamp || row.created_at || "";
+        const id = row.id ?? timeText;
+        return (
+          <div
+            className="time-cell"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "100%",
+            }}
+          >
+            <span style={{ display: "inline-block" }}>{timeText}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                // chặn mọi handler khác (row click, navigation, v.v.)
+                e.stopPropagation();
+                e.preventDefault();
+                if (e.nativeEvent) e.nativeEvent.stopImmediatePropagation();
+                handleCopyTime(timeText, id);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              title={copiedId === id ? "Copied" : "Copy"}
+              style={{
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                padding: 4,
+                display: "inline-flex",
+                alignItems: "center",
+              }}
+            >
+              <FaRegCopy />
+            </button>
+            {copiedId === id ? (
+              <small style={{ color: "#28a745", marginLeft: 4 }}>Copied</small>
+            ) : null}
+          </div>
+        );
+      },
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
     },
   ];
 
@@ -121,22 +220,12 @@ function DataSensor() {
       dateFilter,
       parameterFilter,
     });
+    // cleanup copy timeout on unmount
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const fetchData = async (filters = {}) => {
-    try {
-      const response = await axios.get("http://localhost:8081/sensor_search", {
-        params: filters,
-      });
-      console.log(response.data);
-      setCurrentPage(1)
-      setRecord(response.data.data);
-      setTotalRows(response.data.totalRows);
-      // handlePageChange(currentPage);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
 
   const handleSearch = () => {
     fetchData({
@@ -147,7 +236,7 @@ function DataSensor() {
   };
 
   const handleSearchTermChange = (e) => {
-    setSearchTerm(e.target.value); // Search term will be debounced
+    setSearchTerm(e.target.value);
   };
 
   const handleParameterFilterChange = (e) => {
@@ -160,10 +249,12 @@ function DataSensor() {
 
   const handleRowsPerPageChange = (newPageSize) => {
     setPageSize(newPageSize);
-    fetchData(currentPage, newPageSize, {
+    fetchData({
       searchTerm,
       dateFilter,
       parameterFilter,
+      pageSize: newPageSize,
+      currentPage,
     });
   };
 
@@ -173,19 +264,19 @@ function DataSensor() {
       searchTerm,
       dateFilter,
       parameterFilter,
-      pageSize, 
-      currentPage: value, 
+      pageSize,
+      currentPage: value,
     });
   };
 
   const handlePageSize = (e) => {
-    console.log(e.target.value);
-    setPageSize(e.target.value);
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
     fetchData({
       searchTerm,
       parameterFilter,
       dateFilter,
-      pageSize: e.target.value,
+      pageSize: newSize,
       currentPage,
     });
   };
@@ -223,7 +314,7 @@ function DataSensor() {
           <input
             type="text"
             className="form-control"
-            onChange={handleSearchTermChange} // Search will be debounced
+            onChange={handleSearchTermChange}
             placeholder="Tìm kiếm..."
           />
         </div>
@@ -256,7 +347,7 @@ function DataSensor() {
           className="form-select me-3"
           style={{ maxWidth: "150px" }}
           onChange={handlePageSize}
-          defaultValue=""
+          defaultValue={String(pageSize)}
         >
           <option value="10">10</option>
           <option value="20">20</option>
@@ -264,9 +355,9 @@ function DataSensor() {
           <option value="50">50</option>
         </select>
         <Pagination
-          count={Math.ceil(totalRows / pageSize)}
-          defaultPage={1}
-          siblingCount={2} // Increase to show more sibling pages
+          count={Math.max(1, Math.ceil(totalRows / pageSize))}
+          page={currentPage}
+          siblingCount={2}
           onChange={handlePageChange}
         />
       </div>

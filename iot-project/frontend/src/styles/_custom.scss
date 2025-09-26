@@ -1,8 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital@0;1&display=swap');
+/* ...existing code... */
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:ital@0;1&display=swap");
+
+/* Ép root trong bundle SCSS để không bị ghi đè */
+:root {
+  font-size: 22px !important;
+}
 
 .spinning-fan {
   animation: spin 2s linear infinite;
-  font-size: 2rem;
+  font-size: 2.4rem;
 }
 
 @keyframes spin {
@@ -15,22 +21,24 @@
 }
 
 .shining-light {
-  color: #FFD700;
-  font-size: 2rem;
+  color: #ffd700;
+  font-size: 2.4rem;
   animation: glow 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
   from {
-    text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700, 0 0 50px #FFD700, 0 0 60px #FFD700, 0 0 70px #FFD700;
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700,
+      0 0 40px #ffd700, 0 0 50px #ffd700, 0 0 60px #ffd700, 0 0 70px #ffd700;
   }
   to {
-    text-shadow: 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700, 0 0 50px #FFD700, 0 0 60px #FFD700, 0 0 70px #FFD700, 0 0 80px #FFD700;
+    text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffd700,
+      0 0 50px #ffd700, 0 0 60px #ffd700, 0 0 70px #ffd700, 0 0 80px #ffd700;
   }
 }
 
 .blowing-air {
-  font-size: 2rem;
+  font-size: 2.4rem;
   animation: blow 1.5s ease-in-out infinite;
 }
 
@@ -46,20 +54,21 @@
   }
 }
 
-.temp{
-  font-size: 2rem;
+.temp {
+  font-size: 2.4rem;
 }
 
-.humi{
-  font-size: 2rem;
+.humi {
+  font-size: 2.4rem;
 }
 
-.lux{
-  font-size: 2rem;
+.lux {
+  font-size: 2.4rem;
 }
 
-.fan{
-  :hover{
+.fan {
+  :hover {
     background-color: #18b418;
   }
 }
+/* ...existing code... */
