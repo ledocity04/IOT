@@ -71,7 +71,7 @@ const ProfilePage = () => {
                     }}
                   >
                     <a
-                      href="/assets/document.pdf"
+                      href="https://drive.google.com/file/d/1vHtDfB1LCDo8EIB1ybXfeGE687OyT6Jp/view?usp=drive_link"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-danger"
